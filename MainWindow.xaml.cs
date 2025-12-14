@@ -4,29 +4,35 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
-using System.Windows.Threading;
 
 namespace screenring
 {
     public partial class MainWindow : Window
     {
         private int thickness = 50;
-        private readonly DispatcherTimer _cursorTimer;
-        private const int _clearRadius = 100;
+
+        // Reused geometry objects to avoid allocations each frame
+        private readonly RectangleGeometry _fullRectGeom = new RectangleGeometry();
+        private readonly EllipseGeometry _holeGeom = new EllipseGeometry();
+        private readonly CombinedGeometry _combinedClip;
+        private System.Windows.Point _lastCursor = new System.Windows.Point(double.NaN, double.NaN);
+
+        // clear radius (pixels in WPF units)
+        private const double ClearRadius = 100.0;
 
         public MainWindow()
         {
             InitializeComponent();
 
-            // Poll global cursor position while the overlay is visible
-            _cursorTimer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromMilliseconds(33) // ~30Hz
-            };
-            _cursorTimer.Tick += CursorTimer_Tick;
+            // Combined geometry built once and updated by changing _holeGeom.Center
+            _combinedClip = new CombinedGeometry(GeometryCombineMode.Exclude, _fullRectGeom, _holeGeom);
 
             IsVisibleChanged += MainWindow_IsVisibleChanged;
+            SizeChanged += MainWindow_SizeChanged;
         }
+
+        // Allow external code to read current thickness so sliders can initialize correctly
+        public int GetThickness() => thickness;
 
         // Prevent user from actually closing the window so tray/hotkey logic can Show() it later.
         // When the application is exiting (App.IsExiting == true) allow the close to proceed.
@@ -39,31 +45,38 @@ namespace screenring
                 return;
             }
 
-            StopCursorTimer();
+            // ensure we unsubscribe from rendering when app is closing
+            CompositionTarget.Rendering -= CompositionTarget_Rendering;
             base.OnClosing(e);
         }
 
         private void MainWindow_IsVisibleChanged(object? sender, DependencyPropertyChangedEventArgs e)
         {
             if (IsVisible)
-                StartCursorTimer();
+                StartRendering();
             else
-                StopCursorTimer();
+                StopRendering();
         }
 
-        private void StartCursorTimer()
+        private void MainWindow_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (!_cursorTimer.IsEnabled && IsLoaded)
-                _cursorTimer.Start();
+            // update full rect geometry to current window size (WPF units)
+            _fullRectGeom.Rect = new Rect(0, 0, ActualWidth, ActualHeight);
         }
 
-        private void StopCursorTimer()
+        private void StartRendering()
         {
-            if (_cursorTimer.IsEnabled)
-                _cursorTimer.Stop();
+            // Hook into per-frame rendering to get smooth updates (vs. DispatcherTimer)
+            CompositionTarget.Rendering += CompositionTarget_Rendering;
+            // ensure geometry rect matches
+            _fullRectGeom.Rect = new Rect(0, 0, ActualWidth, ActualHeight);
+        }
 
-            // remove any temporary hole
+        private void StopRendering()
+        {
+            CompositionTarget.Rendering -= CompositionTarget_Rendering;
             RingGrid.Clip = null;
+            _lastCursor = new System.Windows.Point(double.NaN, double.NaN);
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -75,18 +88,17 @@ namespace screenring
 
             MakeClickThrough();
 
-            // start timer if window is visible after loaded
+            // apply current thickness to the rectangles initially
+            ApplyThickness();
+
             if (IsVisible)
-                StartCursorTimer();
+                StartRendering();
         }
 
         public void SetThickness(int value)
         {
             thickness = value;
             ApplyThickness();
-
-            // immediately refresh the hole so it respects new thickness
-            RefreshClip();
         }
 
         private void ApplyThickness()
@@ -95,29 +107,21 @@ namespace screenring
             BottomRect.Height = thickness;
             LeftRect.Width = thickness;
             RightRect.Width = thickness;
+
+            // Update full rect in case layout changed
+            _fullRectGeom.Rect = new Rect(0, 0, ActualWidth, ActualHeight);
         }
 
-        private void CursorTimer_Tick(object? sender, EventArgs e)
+        private void CompositionTarget_Rendering(object? sender, EventArgs e)
         {
-            RefreshClip();
-        }
-
-        private void RefreshClip()
-        {
-            // only update when the window has size and is visible
-            if (!IsVisible || !IsLoaded || ActualWidth <= 0 || ActualHeight <= 0)
-            {
-                RingGrid.Clip = null;
-                return;
-            }
-
+            // Get cursor in screen (device) pixels
             if (!GetCursorPos(out POINT pt))
             {
                 RingGrid.Clip = null;
                 return;
             }
 
-            // Convert device (physical) pixels to WPF device-independent units
+            // Convert device pixels to WPF units
             var source = PresentationSource.FromVisual(this) as HwndSource;
             if (source == null || source.CompositionTarget == null)
             {
@@ -128,7 +132,19 @@ namespace screenring
             var transform = source.CompositionTarget.TransformFromDevice;
             var cursor = transform.Transform(new System.Windows.Point(pt.X, pt.Y));
 
-            // Check if cursor is over any of the ring rectangles
+            // small threshold to avoid updating when cursor hasn't moved much (reduces jitter)
+            const double moveThreshold = 0.5;
+            if (!double.IsNaN(_lastCursor.X) &&
+                Math.Abs(cursor.X - _lastCursor.X) < moveThreshold &&
+                Math.Abs(cursor.Y - _lastCursor.Y) < moveThreshold)
+            {
+                // no meaningful movement, skip heavy work
+                return;
+            }
+
+            _lastCursor = cursor;
+
+            // Check if cursor is over any ring rectangle (use thickness and current Actual sizes)
             bool overTop = cursor.Y <= thickness;
             bool overBottom = cursor.Y >= (ActualHeight - thickness);
             bool overLeft = cursor.X <= thickness;
@@ -136,28 +152,19 @@ namespace screenring
 
             if (overTop || overBottom || overLeft || overRight)
             {
-                UpdateClipWithHole(cursor, _clearRadius);
+                // update hole center and radius (update existing geometry instances only)
+                _holeGeom.Center = cursor;
+                _holeGeom.RadiusX = ClearRadius;
+                _holeGeom.RadiusY = ClearRadius;
+
+                // assign combined clip (same object instance — cheap)
+                RingGrid.Clip = _combinedClip;
             }
             else
             {
-                // no hole, ensure normal rendering
+                // not over ring: clear clip
                 RingGrid.Clip = null;
             }
-        }
-
-        private void UpdateClipWithHole(System.Windows.Point center, double radius)
-        {
-            // Full window rectangle geometry
-            var fullRect = new Rect(0, 0, ActualWidth, ActualHeight);
-            var rectGeom = new RectangleGeometry(fullRect);
-
-            // Ellipse (hole) centered at cursor position
-            var hole = new EllipseGeometry(center, radius, radius);
-
-            // Exclude (rectangle minus ellipse) so the ellipse becomes transparent
-            var combined = new CombinedGeometry(GeometryCombineMode.Exclude, rectGeom, hole);
-
-            RingGrid.Clip = combined;
         }
 
         private void MakeClickThrough()

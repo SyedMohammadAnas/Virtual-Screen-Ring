@@ -5,19 +5,25 @@ namespace screenring
     public partial class ThicknessWindow : Window
     {
         private readonly MainWindow _overlayWindow;
+        private bool _suppressSliderEvent;
 
         public ThicknessWindow(MainWindow overlayWindow)
         {
-            // assign before InitializeComponent so slider events during initialization
-            // won't race with a null reference.
             _overlayWindow = overlayWindow;
 
+            // suppress slider events while initializing and syncing value
+            _suppressSliderEvent = true;
             InitializeComponent();
+
+            // sync slider to current overlay thickness so opening the window doesn't reset it
+            ThicknessSlider.Value = _overlayWindow.GetThickness();
+
+            _suppressSliderEvent = false;
         }
 
         private void OnThicknessSliderValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (_overlayWindow is null)
+            if (_suppressSliderEvent)
                 return;
 
             _overlayWindow.SetThickness((int)e.NewValue);
