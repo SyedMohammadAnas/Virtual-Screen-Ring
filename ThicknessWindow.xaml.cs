@@ -4,17 +4,23 @@ namespace screenring
 {
     public partial class ThicknessWindow : Window
     {
-        private readonly MainWindow overlay;
+        private readonly MainWindow _overlayWindow;
 
         public ThicknessWindow(MainWindow overlayWindow)
         {
+            // assign before InitializeComponent so slider events during initialization
+            // won't race with a null reference.
+            _overlayWindow = overlayWindow;
+
             InitializeComponent();
-            overlay = overlayWindow;
         }
 
-        private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        private void OnThicknessSliderValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            overlay.SetThickness((int)e.NewValue);
+            if (_overlayWindow is null)
+                return;
+
+            _overlayWindow.SetThickness((int)e.NewValue);
         }
     }
 }

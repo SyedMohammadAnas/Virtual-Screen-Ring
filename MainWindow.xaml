@@ -9,7 +9,7 @@
         Topmost="True"
         Loaded="Window_Loaded">
 
-    <Grid>
+    <Grid x:Name="RingGrid">
         <Rectangle x:Name="TopRect" Fill="White" VerticalAlignment="Top"/>
         <Rectangle x:Name="BottomRect" Fill="White" VerticalAlignment="Bottom"/>
         <Rectangle x:Name="LeftRect" Fill="White" HorizontalAlignment="Left"/>

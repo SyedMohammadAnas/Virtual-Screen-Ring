@@ -18,6 +18,6 @@
                 Value="50"
                 TickFrequency="10"
                 IsSnapToTickEnabled="True"
-                ValueChanged="Slider_ValueChanged"/>
+                ValueChanged="OnThicknessSliderValueChanged"/>
     </StackPanel>
 </Window>

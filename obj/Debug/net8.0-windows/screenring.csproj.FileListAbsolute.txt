@@ -1,6 +1,8 @@
 G:\screenring\screenring\obj\Debug\net8.0-windows\MainWindow.baml
+G:\screenring\screenring\obj\Debug\net8.0-windows\ThicknessWindow.baml
 G:\screenring\screenring\obj\Debug\net8.0-windows\App.baml
 G:\screenring\screenring\obj\Debug\net8.0-windows\MainWindow.g.cs
+G:\screenring\screenring\obj\Debug\net8.0-windows\ThicknessWindow.g.cs
 G:\screenring\screenring\obj\Debug\net8.0-windows\App.g.cs
 G:\screenring\screenring\obj\Debug\net8.0-windows\screenring_MarkupCompile.cache
 G:\screenring\screenring\obj\Debug\net8.0-windows\screenring.g.resources
@@ -8,6 +10,7 @@ G:\screenring\screenring\obj\Debug\net8.0-windows\screenring.GeneratedMSBuildEdi
 G:\screenring\screenring\obj\Debug\net8.0-windows\screenring.AssemblyInfoInputs.cache
 G:\screenring\screenring\obj\Debug\net8.0-windows\screenring.AssemblyInfo.cs
 G:\screenring\screenring\obj\Debug\net8.0-windows\screenring.csproj.CoreCompileInputs.cache
+G:\screenring\screenring\obj\Debug\net8.0-windows\screenring.sourcelink.json
 G:\screenring\screenring\bin\Debug\net8.0-windows\screenring.exe
 G:\screenring\screenring\bin\Debug\net8.0-windows\screenring.deps.json
 G:\screenring\screenring\bin\Debug\net8.0-windows\screenring.runtimeconfig.json
@@ -18,5 +21,3 @@ G:\screenring\screenring\obj\Debug\net8.0-windows\refint\screenring.dll
 G:\screenring\screenring\obj\Debug\net8.0-windows\screenring.pdb
 G:\screenring\screenring\obj\Debug\net8.0-windows\screenring.genruntimeconfig.cache
 G:\screenring\screenring\obj\Debug\net8.0-windows\ref\screenring.dll
-G:\screenring\screenring\obj\Debug\net8.0-windows\ThicknessWindow.baml
-G:\screenring\screenring\obj\Debug\net8.0-windows\ThicknessWindow.g.cs
