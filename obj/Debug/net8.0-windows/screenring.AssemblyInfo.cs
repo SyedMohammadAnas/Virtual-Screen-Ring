@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("screenring")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+141e664650cc69db02d6e2fcbc84dbe29e3d12a4")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1173fe7ed4a0d74223d5dd93b0e5c47e447c2feb")]
 [assembly: System.Reflection.AssemblyProductAttribute("screenring")]
 [assembly: System.Reflection.AssemblyTitleAttribute("screenring")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
