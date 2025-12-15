@@ -1,0 +1,19 @@
+﻿<Window x:Class="screenring.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ShowInTaskbar="False"
+        Topmost="True"
+        Loaded="Window_Loaded"
+        Icon="screenring.ico">
+
+    <Grid x:Name="RingGrid">
+        <Rectangle x:Name="TopRect" Fill="White" VerticalAlignment="Top"/>
+        <Rectangle x:Name="BottomRect" Fill="White" VerticalAlignment="Bottom"/>
+        <Rectangle x:Name="LeftRect" Fill="White" HorizontalAlignment="Left"/>
+        <Rectangle x:Name="RightRect" Fill="White" HorizontalAlignment="Right"/>
+    </Grid>
+</Window>

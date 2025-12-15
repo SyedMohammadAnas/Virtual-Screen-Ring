@@ -1,0 +1,65 @@
+# Build output
+/bin/
+/obj/
+/out/
+/artifacts/
+/publish/
+/publish_output/
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Visual Studio Code
+.vscode/
+
+# Rider/JetBrains
+.idea/
+
+# NuGet
+packages/
+*.nupkg
+*.snupkg
+.nuget/
+
+# Build & test logs
+*.log
+TestResults/
+*.trx
+
+# Debug symbols and compiled files
+*.pdb
+*.mdb
+*.dll
+*.exe
+
+# Packaging
+*.zip
+*.tar.gz
+
+# Temporary files
+*.tmp
+*.temp
+*.cache
+Thumbs.db
+ehthumbs.db
+desktop.ini
+.DS_Store
+
+# Visual Studio source control / project files
+*.vspscc
+*.vssscc
+
+# User-specific / machine-specific files
+*.user
+*.userprefs
+*.credentials
+secrets.json
+
+# Misc
+ReSharperUserOptions.xml
+_ReSharper*/
+*.ide.*
